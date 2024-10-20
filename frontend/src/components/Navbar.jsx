@@ -18,7 +18,12 @@ const Navbar = () => {
                 <Flex
                     alignItems={"center"}
                     justifyContent={"space-between"}
+                    gap={3}
+                    display={{base:"none", sm:"flex"}}
                 >
+                    <img src="/react.png" alt="" />
+                    <img src="/python.png" alt="" />
+                    <img src="/explode.png" alt="" />
 
                 </Flex>
                 {/* Right side */}
