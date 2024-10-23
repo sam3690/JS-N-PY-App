@@ -13,7 +13,7 @@ const UserCard = ({user}) => {
 
                         <Box>
                             <Heading size='sm'>{user.name}</Heading>
-                            <Text>{user.job}</Text>
+                            <Text>{user.role}</Text>
                         </Box>
                     </Flex>
                     <Flex>
