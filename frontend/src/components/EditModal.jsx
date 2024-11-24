@@ -12,15 +12,65 @@ import {
     ModalFooter, 
     ModalHeader, 
     ModalOverlay, 
-    Radio, 
-    RadioGroup, 
     Textarea, 
-    useDisclosure } from '@chakra-ui/react'
-import React from 'react'
+    useDisclosure, 
+    useToast} from '@chakra-ui/react'
+import React, { useState } from 'react'
 import { BiAddToQueue, BiEditAlt } from 'react-icons/bi'
+import { API_URL } from '../App'
 
-const EditModal = () => {
+const EditModal = ({ setUsers, user }) => {
     const {isOpen, onOpen, onClose } = useDisclosure()
+    const [isLoading, setIsLoading] = useState(false)
+    const [inputs, setInputs] = useState({
+        name: user.name,
+        role: user.role,
+        description: user.description,
+    })
+    const toast = useToast()
+
+    const handleEditUser = async (e) => {
+        e.preventDefault()
+        setIsLoading(true)
+        try {
+            const res = await fetch(API_URL + "/friends/" + user.id, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inputs),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                throw new Error(data.message)
+            }
+
+            setUsers((prev) => prev.map((u) => u.id === user.id ? data : u))
+
+            toast ({
+                title: 'Friend Updated',
+                status: 'success',
+                description: "Friend updated successfully",
+                duration: 2000,
+                isClosable: true,
+                position: 'top-center',
+            })
+            onClose()
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: error.message,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top-center',
+            })
+        }finally{
+            setIsLoading(false)
+        }
+
+    }
+
     return <>
             <IconButton 
                 onClick={onOpen}
@@ -36,6 +86,7 @@ const EditModal = () => {
           onClose={onClose}
       >
           <ModalOverlay/>
+          <form onSubmit={handleEditUser}>
           <ModalContent>
               <ModalHeader> My New Friend 😍 </ModalHeader>
               <ModalCloseButton/>
@@ -44,13 +95,20 @@ const EditModal = () => {
                           {/* Left */}
                           <FormControl>
                               <FormLabel>Full Name</FormLabel>
-                              <Input placeholder='John Doe'/>
+                              <Input placeholder='John Doe'
+                               value={inputs.name} 
+                               onChange={(e) => setInputs((prev) => ({...prev, name: e.target.value}))}
+                               />
   
                           </FormControl>
                           {/* Right */}
                           <FormControl>
                               <FormLabel>Job</FormLabel>
-                              <Input placeholder='Software Engineer'/>
+                              <Input placeholder='Software Engineer'
+                                value={inputs.role}
+                               onChange={(e) => setInputs((prev) => ({...prev, role: e.target.value}))}
+
+                              />
   
                           </FormControl>
                       </Flex>
@@ -61,15 +119,19 @@ const EditModal = () => {
                                   resize={"none"}
                                   overflow={"hidden"}
                                   placeholder="He's a Software Developer who loves to code and build things."
+                                  value={inputs.description}
+                                  onChange={(e) => setInputs((prev) => ({...prev, description: e.target.value}))}
+
                               />
   
                           </FormControl>
                   </ModalBody>
                   <ModalFooter>
-                      <Button colorScheme='blue' mr={3}>Add</Button>
+                      <Button colorScheme='blue' mr={3} type='submit' isLoading={isLoading}>Update</Button>
                       <Button onClick={onClose}>Cancel</Button>
                   </ModalFooter>
           </ModalContent>
+          </form>
       </Modal>
   </>  
 }
